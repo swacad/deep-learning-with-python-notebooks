@@ -6,7 +6,7 @@ import plotting
 
 import numpy as np
 
-os.environ['CUDA_VISIBLE_DEVICES'] = 0
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 with open('jena_climate_2009_2016.csv') as f:
     lines = []
@@ -103,9 +103,9 @@ def evaluate_naive_method():
             print(step, mae)
     print(np.mean(batch_maes))
 
-print(evaluate_naive_method())
-celsius_mae = 0.29 * std[1]
-print(celsius_mae)
+# print(evaluate_naive_method())
+# celsius_mae = 0.29 * std[1]
+# print(celsius_mae)
 
 from keras.models import Sequential
 from keras import layers
