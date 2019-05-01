@@ -5,6 +5,7 @@ from pprint import pprint
 import plotting
 
 import numpy as np
+from numba import njit
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
@@ -18,24 +19,41 @@ header = lines[0]
 lines.pop(0)
 
 print(header)
-# print(len(lines))
-# pprint(lines[0])
 
 float_data = np.zeros((len(lines), len(header) - 1))
 for i, line in enumerate(lines):
     float_data[i] = line[1:]
 
-# print(float_data[0])
 
 temp = float_data[:, 1]
-# plt.plot(range(len(temp)), temp)
-# plt.plot(range(1440), temp[:1440])
-# plt.show()
-
 mean = float_data[:200000].mean(axis=0)
 float_data -= mean
 std = float_data[:200000].std(axis=0)
 float_data /= std
+
+
+# def generator(data, lookback, delay, min_index, max_index,
+#               shuffle=False, batch_size=128, step=6):
+#     if max_index is None:
+#         max_index = len(data) - delay - 1
+#     i = min_index + lookback
+#     while 1:
+#         if shuffle:
+#             rows = np.random.randint(min_index + lookback, max_index, size=batch_size)
+#         else:
+#             if i + batch_size >= max_index:
+#                 i = min_index + lookback
+#             rows = np.arange(i, min(i + batch_size, max_index))
+#             i += len(rows)
+#
+#         samples = np.zeros((len(rows), lookback // step, data.shape[-1]))
+#         targets = np.zeros((len(rows),))
+#         for j, row in enumerate(rows):
+#             indices = range(rows[j] - lookback, rows[j], step)
+#             samples[j] = data[indices]
+#             targets[j] = data[rows[j] + delay][1]
+#
+#         yield samples, targets
 
 
 def generator(data, lookback, delay, min_index, max_index,
@@ -52,13 +70,21 @@ def generator(data, lookback, delay, min_index, max_index,
             rows = np.arange(i, min(i + batch_size, max_index))
             i += len(rows)
 
-        samples = np.zeros((len(rows), lookback // step, data.shape[-1]))
-        targets = np.zeros((len(rows),))
-        for j, row in enumerate(rows):
-            indices = range(rows[j] - lookback, rows[j], step)
-            samples[j] = data[indices]
-            targets[j] = data[rows[j] + delay][1]
+        samples, targets = gen_loop(rows, data, delay, lookback, step)
+
         yield samples, targets
+
+@njit
+def gen_loop(rows, data, delay, lookback, step):
+    samples = np.zeros((len(rows), lookback // step, data.shape[-1]))
+    targets = np.zeros((len(rows),))
+    for j in range(len(rows)):
+        indices = np.arange(rows[j] - lookback, rows[j], step)
+        samples[j] = data[indices]
+        targets[j] = data[rows[j] + delay][1]
+
+    return samples, targets
+
 
 lookback = 1440  # 10 days
 step = 6  # 1 hour steps
