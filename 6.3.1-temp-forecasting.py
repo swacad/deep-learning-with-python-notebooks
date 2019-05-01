@@ -1,6 +1,7 @@
 import csv
 from matplotlib import pyplot as plt
 from pprint import pprint
+import plotting
 
 import numpy as np
 
@@ -117,3 +118,5 @@ history = model.fit_generator(train_gen,
                               epochs=20,
                               validation_data=val_gen,
                               validation_steps=val_steps)
+
+plotting.plot_loss(history, '6.20_loss.png')
