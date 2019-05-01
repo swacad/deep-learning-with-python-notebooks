@@ -1,9 +1,12 @@
 import csv
+import os
 from matplotlib import pyplot as plt
 from pprint import pprint
 import plotting
 
 import numpy as np
+
+os.environ['CUDA_VISIBLE_DEVICES'] = 0
 
 with open('jena_climate_2009_2016.csv') as f:
     lines = []
