@@ -61,7 +61,7 @@ def generator(data, lookback, delay, min_index, max_index,
     if max_index is None:
         max_index = len(data) - delay - 1
     i = min_index + lookback
-    while 1:
+    while True:
         if shuffle:
             rows = np.random.randint(min_index + lookback, max_index, size=batch_size)
         else:
@@ -133,14 +133,31 @@ def evaluate_naive_method():
 # celsius_mae = 0.29 * std[1]
 # print(celsius_mae)
 
+# from keras.models import Sequential
+# from keras import layers
+# from keras.optimizers import RMSprop
+
+# model = Sequential()
+# model.add(layers.Flatten(input_shape=(lookback // step, float_data.shape[-1])))
+# model.add(layers.Dense(32, activation='relu'))
+# model.add(layers.Dense(1))
+# model.compile(optimizer=RMSprop(), loss='mae')
+# history = model.fit_generator(train_gen,
+#                               steps_per_epoch=500,
+#                               epochs=20,
+#                               validation_data=val_gen,
+#                               validation_steps=val_steps)
+
+# plotting.plot_loss(history, '6.20_loss.png')
+
 from keras.models import Sequential
 from keras import layers
 from keras.optimizers import RMSprop
 
 model = Sequential()
-model.add(layers.Flatten(input_shape=(lookback // step, float_data.shape[-1])))
-model.add(layers.Dense(32, activation='relu'))
+model.add(layers.GRU(32, input_shape=(None, float_data.shape[-1])))
 model.add(layers.Dense(1))
+
 model.compile(optimizer=RMSprop(), loss='mae')
 history = model.fit_generator(train_gen,
                               steps_per_epoch=500,
@@ -148,4 +165,4 @@ history = model.fit_generator(train_gen,
                               validation_data=val_gen,
                               validation_steps=val_steps)
 
-plotting.plot_loss(history, '6.20_loss.png')
+plotting.plot_loss(history, '6.21_loss.png')

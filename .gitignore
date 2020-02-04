@@ -212,3 +212,5 @@ pre_trained_glove_model.h5
 !/cats_and_dogs_small_1.h5
 /cats_and_dogs_small_1.h5
 /cats_and_dogs_small_2.h5
+
+.vscode
